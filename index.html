@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Professional Memo App</title>
+    <link rel="stylesheet" href="style/style.css" />
+    <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+    <link
+      href="https://unpkg.com/filepond/dist/filepond.css"
+      rel="stylesheet"
+    />
+    <script src="tinymce/tinymce.min.js"></script>
+    <!-- Font Awesome 아이콘 라이브러리 추가 -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div
+      id="error-message"
+      style="
+        display: none;
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #ff6b6b;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        z-index: 1000;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      "
+    >
+      Title and content cannot be empty!
+    </div>
+
+    <div id="app">
+      <nav class="navbar">
+        <h1><i class="fas fa-sticky-note"></i> SMART NOTE</h1>
+        <div class="nav-buttons">
+          <input
+            type="text"
+            placeholder="Search memos..."
+            oninput="searchMemos(this.value)"
+          />
+        </div>
+      </nav>
+      <div class="content">
+        <!-- Left Sidebar (Memo List) -->
+        <aside class="memo-list">
+          <div class="memo-header">
+            <h2>Notes</h2>
+            <button class="new-memo-button" onclick="createNewMemo()">+</button>
+          </div>
+          <ul id="memos"></ul>
+        </aside>
+
+        <!-- Main Memo Editor -->
+        <main class="memo-editor">
+          <input type="text" id="memo-title" placeholder="Title" />
+          <div class="file-upload-area">
+            <input type="file" class="filepond" name="filepond" />
+          </div>
+          <textarea id="memo-content"></textarea>
+          <button class="save-button" onclick="saveMemo()">Save</button>
+        </main>
+
+        <!-- Right Sidebar (AI Features) -->
+        <aside class="ai-panel">
+          <div class="ai-tabs">
+            <button onclick="showAITab('summarize')" id="summarize-tab">
+              Summarize
+            </button>
+            <button onclick="showAITab('spellcheck')" id="spellcheck-tab">
+              Spell Check
+            </button>
+            <button onclick="showAITab('qa')" id="qa-tab">Q&A</button>
+            <button onclick="showAITab('translate')" id="translate-tab">
+              Translate
+            </button>
+            <button onclick="showAITab('analyze')" id="analyze-tab">
+              Analyze
+            </button>
+          </div>
+          <div class="ai-content" id="ai-content">
+            <div class="result-card" id="summarize-result">
+              <h3>Summary:</h3>
+              <p id="summarize-text">Summarized text will be displayed here.</p>
+            </div>
+            <div class="result-card" id="spellcheck-result">
+              <h3>Spell Check:</h3>
+              <p id="spellcheck-text">Corrected text will be displayed here.</p>
+            </div>
+            <div class="result-card" id="qa-result">
+              <h3>Q&A Answer:</h3>
+              <p id="qa-text">
+                Answers to your questions will be displayed here.
+              </p>
+            </div>
+            <div class="result-card" id="translate-result">
+              <h3>Translation:</h3>
+              <p id="translate-text">Translated text will be displayed here.</p>
+            </div>
+            <div class="result-card" id="analyze-result">
+              <h3>Analysis:</h3>
+              <p id="analyze-text">Analyzed results will be displayed here.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <script src="renderer.js"></script>
+    <script>
+      FilePond.create(document.querySelector(".filepond"));
+      function showAITab(tab) {
+        document.getElementById("ai-content").innerHTML = "";
+        document
+          .querySelectorAll(".ai-tabs button")
+          .forEach((button) => button.classList.remove("active"));
+        document.getElementById(tab + "-tab").classList.add("active");
+
+        switch (tab) {
+          case "summarize":
+            document.getElementById("ai-content").innerHTML = `
+                <div id="summarize-result">
+                    <h3>Summary:</h3>
+                    <p id="summarize-text">Summarizing...</p>
+                </div>
+            `;
+            summarizeMemo(); // Summarize 클릭 시 자동 실행
+            break;
+
+          case "spellcheck":
+            document.getElementById("ai-content").innerHTML = `
+                <div id="spellcheck-result">
+                    <h3>Spell Check:</h3>
+                    <p id="spellcheck-text">Checking spelling...</p>
+                </div>
+            `;
+            checkSpelling(); // Spell Check 클릭 시 자동 실행
+            break;
+
+          case "analyze":
+            document.getElementById("ai-content").innerHTML = `
+                <div id="analyze-result">
+                    <h3>Analysis:</h3>
+                    <p id="analyze-text">Analyzing...</p>
+                </div>
+            `;
+            analyzeMemo(); // Analyze 클릭 시 자동 실행
+            break;
+
+          case "qa":
+            document.getElementById("ai-content").innerHTML = `
+        <div id="qa-content" style="display: flex; align-items: center; gap: 10px; margin-top: 20px;">
+            <input 
+                type="text" 
+                id="question" 
+                placeholder="Ask a question..." 
+                style="flex: 1; padding: 0 12px; height: 42px; line-height: 42px; border: 1px solid #44475a; border-radius: 8px; background-color: #2e2e42; color: #f8f8f2; font-size: 14px; outline: none; transition: border-color 0.3s ease; box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.2);"
+                onfocus="this.style.borderColor='#50fa7b'" 
+                onblur="this.style.borderColor='#44475a'"
+            >
+            <button 
+                class="qa-button" 
+                onclick="askQuestion()" 
+                style="width: 120px; height: 42px; background-color: #6a5acd; color: #ffffff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); display: flex; align-items: center; justify-content: center;"
+                onmouseover="this.style.backgroundColor='#836fff'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0px 6px 8px rgba(0, 0, 0, 0.3)';" 
+                onmouseout="this.style.backgroundColor='#6a5acd'; this.style.transform='translateY(0px)'; this.style.boxShadow='0px 4px 6px rgba(0, 0, 0, 0.2)';"
+            >
+            Ask AI
+            </button>
+        </div>
+        <div id="qa-result" style="margin-top: 20px;"></div>
+    `;
+            break;
+
+          case "translate":
+            document.getElementById("ai-content").innerHTML = `
+        <div id="translate-content" style="display: flex; align-items: center; gap: 10px; margin-top: 20px;">
+            <select 
+                id="language" 
+                style="width: 150px; height: 42px; padding: 8px; border: 1px solid #44475a; border-radius: 8px; background-color: #2e2e42; color: #f8f8f2; font-size: 14px; outline: none; transition: border-color 0.3s ease; box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.2);"
+                onfocus="this.style.borderColor='#50fa7b'" 
+                onblur="this.style.borderColor='#44475a'"
+            >
+                <option value="ko">Korean</option>
+                <option value="en">English</option>
+                <option value="zh">Chinese</option>
+                <option value="ja">Japanese</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="ru">Russian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ar">Arabic</option>
+            </select>
+            <button 
+                class="translate-button" 
+                onclick="translateMemo()" 
+                style="width: 120px; height: 42px; background-color: #6a5acd; color: #ffffff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); display: flex; align-items: center; justify-content: center;"
+                onmouseover="this.style.backgroundColor='#836fff'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0px 6px 8px rgba(0, 0, 0, 0.3)';" 
+                onmouseout="this.style.backgroundColor='#6a5acd'; this.style.transform='translateY(0px)'; this.style.boxShadow='0px 4px 6px rgba(0, 0, 0, 0.2)';"
+            >
+                Translate
+            </button>
+        </div>
+        <div id="translate-result" style="margin-top: 20px;"></div>
+    `;
+            break;
+        }
+      }
+    </script>
+  </body>
+</html>

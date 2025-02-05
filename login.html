@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="stylesheet" href="style/login.css" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'nonce-randomNonceValue' https://cdn.tiny.cloud; style-src 'self' 'unsafe-inline';"
+    />
+  </head>
+  <body>
+    <div class="content">
+      <!-- 아이콘 추가 -->
+      <img src="img/img2.jpg" alt="SmartMemo Icon" class="icon" />
+      <h2>Welcome to SMART NOTE</h2>
+      <p class="subtitle">Please log in to continue</p>
+      <input type="password" id="password" placeholder="Enter your password" />
+      <button id="loginButton">Login</button>
+      <p id="status"></p>
+    </div>
+    <script nonce="randomNonceValue">
+      document
+        .getElementById("loginButton")
+        .addEventListener("click", async () => {
+          const password = document.getElementById("password").value;
+          await window.electron.ipcRenderer.invoke("login", password);
+        });
+
+      window.electron.ipcRenderer.on("login-success", () => {
+        document.getElementById("status").innerText = "Login successful!";
+      });
+
+      window.electron.ipcRenderer.on("login-failure", () => {
+        document.getElementById("status").innerText =
+          "Invalid password, please try again.";
+        document.getElementById("status").style.color = "red";
+      });
+    </script>
+  </body>
+</html>

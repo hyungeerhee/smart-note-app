@@ -1,0 +1,50 @@
+{
+  "_comment": "package.json",
+  "name": "my-electron-memo",
+  "version": "1.0.0",
+  "description": "A professional Electron-based memo application with advanced features",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "electron-builder"
+  },
+  "keywords": [
+    "electron",
+    "memo",
+    "note-taking",
+    "tag",
+    "rich-text"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^33.0.1",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "openai": "^4.72.0",
+    "tinymce": "^6.6.0"
+  },
+  "build": {
+    "appId": "com.example.myelectronmemo",
+    "productName": "MyElectronMemo",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      ".env"
+    ],
+    "extraMetadata": {
+      "env": {
+        "OPENAI_API_KEY": "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"
+      }
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
