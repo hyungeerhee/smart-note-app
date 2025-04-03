@@ -1,5 +1,7 @@
 # 🧠 SMART AI NOTE
 
+![image](https://github.com/user-attachments/assets/2c56cbe3-144e-410e-becc-3ced0886f7e1)
+
 AI 기능과 클라우드 동기화를 결합한 스마트 데스크탑 메모 애플리케이션입니다.  
 Electron 기반으로 개발되었으며, OpenAI API와 Firebase를 통해 메모의 생성부터 분석, 저장까지 모든 과정을 지원합니다.
 
